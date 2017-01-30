@@ -131,42 +131,36 @@
             {year: "2014-01", value: 455, category: "shoes"},
             {year: "2014-02", value: 478, category: "shoes"}
         ];
-	// timeParse transforms string into a Date
-	var parseDate = d3.timeParse("%Y-%m")
+	var parseDate = d3.timeParse("%Y-%m");
 
     data.forEach(function(d) {
         d.date = parseDate(d.year);
         d.value = +d.value;
     });
 
- 	// Make a selection
 	var table = d3.select('#table').append('table');
 
-	// Add a formatter for dates (timeFormat also transform a JS Date to a string)
 	var	formatDate = d3.timeFormat("%Y-%m");
 
-	// Add rows
-	var tbody = table.append('tbody')
+	var tbody = table.append('tbody');
 	var tr = tbody.selectAll('tr')
     	.data(data).enter()
     	.append('tr');
 
 	tr.append('td').html(function(d) { return formatDate(d.date); });
-	tr.append('td').html(function(d) { return d.category });
-	tr.append('td').html(function(d) { return d.value });
+	tr.append('td').html(function(d) { return d.category; });
+	tr.append('td').html(function(d) { return d.value; });
 
-	//  Add headers for the table
-	var thead = table.append('thead').append('tr')
+	var thead = table.append('thead').append('tr');
 
 	thead.append('th').text("date");
 	thead.append('th').text("category");
 	thead.append('th').attr("class", "value").text("value");
 
-	var month_margin = {top: 20, right: 40, bottom: 70, left: 40},
-    month_width = 900 - month_margin.left - month_margin.right,
-    month_height = 300 - month_margin.top - month_margin.bottom;
+	var month_margin = {top: 40, right: 20, bottom: 20, left: 70},
+    month_height = 900 - month_margin.left - month_margin.right,
+    month_width = 300 - month_margin.top - month_margin.bottom;
 
-	// We add a SVG element to the DOM and to it we add a g for grouping the other vector graphics we will be adding s
 	var svg = d3.select("#month").append("svg")
     .attr("width", month_width + month_margin.left + month_margin.right)
     .attr("height", month_height + month_margin.top + month_margin.bottom)
@@ -174,41 +168,41 @@
     .attr("transform",
         "translate(" + month_margin.left + "," + month_margin.top + ")");
 
-	// For the x we use a timescale, because we have dates.
-	var x = d3.scaleTime().range([0, month_width]).domain([data[0].date, d3.timeMonth.offset(data[data.length-1].date, +1)]);
-	var y = d3.scaleLinear().range([month_height, 0]).domain([0, d3.max(data, function(d) { return d.value; })]);
+	var x = d3.scaleLinear().range([month_width, 0]).domain([0, d3.max(data, function(d) { return d.value; })]);
+	var y = d3.scaleTime().range([0, month_height]).domain([data[0].date, d3.timeMonth.offset(data[data.length-1].date, +1)]);
 
-	// We add a rect element to the SVG group here.
+
 	svg.selectAll("rect")
 	        .data(data)
 	        .enter().append("rect")
 	        .style("fill", "#019875")
-	        .attr("x", function(d) { return x(d.date); })
-	        .attr("width", (month_width / data.length) - 10)
-	        .attr("y", function(d) { return y(d.value); })
-	        .attr("height", function(d) { return month_height - y(d.value); })
+	        .attr("x", function(d) { return x(d.value); })
+	        .attr("width", function(d) { return month_width - x(d.value); })
+	        .attr("y", function(d) { return y(d.date); })
+	        .attr("height", (table._groups[0][0].offsetWidth / data.length) - 10)
 			.attr("class", "column");
 
-	// SVG's have different properties as regular HTML elements. fill determines the color of a rect element.
 
 	var yAxis = d3.axisLeft()
     .scale(y)
-    .tickSize(-month_width) //as wide as our graph
-    .ticks(3);
+    .tickFormat(d3.timeFormat("%Y-%m"));
+
 
 	svg.append("g")
 	    .attr("class", "y axis")
-	    .call(yAxis)
+	    .call(yAxis);
 
 	var xAxis = d3.axisBottom()
      .scale(x)
-     .tickFormat(d3.timeFormat("%Y-%m"));
+	 .tickSize(-month_height) //as wide as our graph
+	 .ticks(3);
+
 
 
 	svg.append("g")
 		 .attr("class", "x axis")
 		 .attr("transform", "translate(0," + month_height + ")")
-		 .call(xAxis)
+		 .call(xAxis);
 
 	 svg.selectAll("label")
 	      .data(data)
@@ -216,10 +210,10 @@
 	      .append("text")
 	      .attr("class", "label")
 	      .style("fill", "#019875")
-	      .attr("y", function(d) { return y(d.value); })
-	      .attr("x", function(d) { return x(d.date); })
-	      .attr("dy", "-.35em") //vertical align middle
-	      .attr("dx", ".7em") //vertical align middle
+	      .attr("y", function(d) { return y(d.date); })
+	      .attr("x", function(d) { return x(d.value); })
+	      .attr("dx", "-2.0em") //vertical align middle
+	      .attr("dy", ".7em") //vertical align middle
 	      .text(function(d){ return d.value; });
 
 </script>
